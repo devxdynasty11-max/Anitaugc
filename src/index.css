@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Cormorant Garamond", "Newsreader", Georgia, serif;
+  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  --font-script: "Caveat", cursive, sans-serif;
+
+  --color-ivory: #FAF8F5;
+  --color-cream: #F5F1EB;
+  --color-offwhite: #FCFBF9;
+  --color-beige: #EFECE6;
+  --color-champagne: #F3EBE1;
+  --color-taupe: #B8ADA0;
+  --color-blush: #EEDCD5;
+  --color-espresso: #241C18;
+  --color-charcoal: #362E2A;
+  --color-sand: #DCD4C8;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    color: var(--color-espresso);
+    background-color: var(--color-ivory);
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, .font-editorial {
+    font-family: var(--font-serif);
+  }
+
+  .font-script {
+    font-family: var(--font-script);
+  }
+}
+
+/* Scrapbook & Editorial accents */
+.washi-tape {
+  background: rgba(238, 220, 213, 0.65);
+  box-shadow: 0 1px 2px rgba(36, 28, 24, 0.05);
+  backdrop-filter: blur(2px);
+  border-left: 2px dashed rgba(200, 180, 170, 0.5);
+  border-right: 2px dashed rgba(200, 180, 170, 0.5);
+}
+
+.washi-tape-taupe {
+  background: rgba(220, 212, 200, 0.65);
+  box-shadow: 0 1px 2px rgba(36, 28, 24, 0.05);
+  backdrop-filter: blur(2px);
+  border-left: 2px dashed rgba(184, 173, 160, 0.5);
+  border-right: 2px dashed rgba(184, 173, 160, 0.5);
+}
+
+.paper-card {
+  background-color: #FFFFFF;
+  border: 1px solid rgba(220, 212, 200, 0.6);
+  box-shadow: 0 2px 8px -2px rgba(36, 28, 24, 0.04), 0 1px 3px -1px rgba(36, 28, 24, 0.02);
+}
+
+.editorial-border {
+  border-color: rgba(214, 204, 192, 0.7);
+}
+
+/* Subtle grain overlay for organic editorial touch */
+.editorial-grain {
+  background-image: radial-gradient(rgba(36, 28, 24, 0.04) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+/* Custom delicate scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #FAF8F5;
+}
+::-webkit-scrollbar-thumb {
+  background: #D8CEBE;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #B8ADA0;
+}

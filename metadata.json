@@ -1,0 +1,7 @@
+{
+  "name": "Anita — UGC Creator Portfolio",
+  "description": "Editorial UGC creator portfolio for Anita Lenka specializing in authentic beauty, skincare, fashion, and aesthetic lifestyle content.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
+

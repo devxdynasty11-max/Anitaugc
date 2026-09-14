@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { Mail, Instagram, ArrowRight, Send, Check } from 'lucide-react';
+import { Mail, Instagram, ArrowRight, Check, Copy, ExternalLink, RotateCcw } from 'lucide-react';
 import { CREATOR_PROFILE } from '../data/portfolioData';
 
 export default function Contact() {
@@ -8,19 +8,59 @@ export default function Contact() {
   const [brand, setBrand] = useState('');
   const [details, setDetails] = useState('');
   const [status, setStatus] = useState<'idle' | 'submitted'>('idle');
+  const [copied, setCopied] = useState(false);
+
+  // Generate subject and body from user input
+  const subjectText = `UGC Collaboration Inquiry from ${brand.trim() ? brand.trim() : name.trim()}`;
+  const bodyText = `Hi Anita,\n\nI would love to collaborate on a UGC campaign with you.\n\n• Name: ${name}\n• Brand / Company: ${brand.trim() || 'Not specified'}\n• Contact Email: ${email}\n\nProject Details:\n${details.trim() || 'I would like to discuss potential UGC video and photography collaborations.'}\n\nLooking forward to hearing from you!\n${name}`;
+
+  const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(CREATOR_PROFILE.email)}&su=${encodeURIComponent(subjectText)}&body=${encodeURIComponent(bodyText)}`;
+  const mailtoUrl = `mailto:${CREATOR_PROFILE.email}?subject=${encodeURIComponent(subjectText)}&body=${encodeURIComponent(bodyText)}`;
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !email.trim()) return;
 
-    const subject = encodeURIComponent(`UGC Collaboration Inquiry from ${brand.trim() ? brand.trim() : name.trim()}`);
-    const body = encodeURIComponent(
-      `Hi Anita,\n\nI would love to collaborate on a UGC campaign.\n\nName: ${name}\nBrand / Company: ${brand || 'N/A'}\nEmail: ${email}\n\nProject Details:\n${details || '[Let me know what you would like to create]'}\n\nLooking forward to hearing from you!`
-    );
+    // In modern browsers & iframes, try opening Gmail or the default mail client in a new window
+    try {
+      // Create a temporary link with target="_blank" to safely escape iframe navigation restrictions
+      const link = document.createElement('a');
+      link.href = gmailComposeUrl;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch {
+      // Fallback
+      window.open(gmailComposeUrl, '_blank');
+    }
 
-    // Launch default email client
-    window.location.href = `mailto:${CREATOR_PROFILE.email}?subject=${subject}&body=${body}`;
     setStatus('submitted');
+  };
+
+  const handleCopyMessage = async () => {
+    try {
+      await navigator.clipboard.writeText(
+        `To: ${CREATOR_PROFILE.email}\nSubject: ${subjectText}\n\n${bodyText}`
+      );
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      // Fallback if clipboard API is restricted
+      const textarea = document.createElement('textarea');
+      textarea.value = `To: ${CREATOR_PROFILE.email}\nSubject: ${subjectText}\n\n${bodyText}`;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    }
+  };
+
+  const handleReset = () => {
+    setStatus('idle');
   };
 
   return (
@@ -75,10 +115,13 @@ export default function Contact() {
               {/* Two Buttons: Send an Email & DM on Instagram */}
               <div className="flex flex-wrap items-start gap-4 pt-1">
                 
+                {/* Left Column Buttons */}
                 {/* Send Email Button */}
                 <div className="flex flex-col items-center">
                   <a
-                    href={`mailto:${CREATOR_PROFILE.email}`}
+                    href={`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(CREATOR_PROFILE.email)}&su=${encodeURIComponent('UGC Collaboration Inquiry')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#241C18] text-[#FAF8F5] text-xs font-sans tracking-[0.04em] hover:bg-[#3D332C] transition-all duration-300 shadow-[0_2px_8px_rgba(36,28,24,0.08)] active:scale-[0.98] cursor-pointer"
                   >
                     <Mail className="w-3.5 h-3.5" />
@@ -121,68 +164,165 @@ export default function Contact() {
 
             </div>
 
-            {/* Right Column: Embedded Form Inside Card */}
+            {/* Right Column: Embedded Form or Submission Action Card */}
             <div className="lg:col-span-6 bg-white/70 backdrop-blur-xs p-6 sm:p-7 rounded-2xl border border-[#E5DDD2] shadow-xs">
-              <form onSubmit={handleSubmit} className="space-y-3.5">
-                
-                {/* Row 1: Name and Email */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                  <input
-                    type="text"
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Name"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#DDD4C8] bg-[#FAF8F5] text-xs text-[#241C18] placeholder-[#9E9185] focus:outline-none focus:border-[#241C18] transition-colors"
-                  />
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Email"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#DDD4C8] bg-[#FAF8F5] text-xs text-[#241C18] placeholder-[#9E9185] focus:outline-none focus:border-[#241C18] transition-colors"
-                  />
-                </div>
-
-                {/* Row 2: Brand / Company */}
-                <div>
-                  <input
-                    type="text"
-                    value={brand}
-                    onChange={(e) => setBrand(e.target.value)}
-                    placeholder="Brand / Company"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#DDD4C8] bg-[#FAF8F5] text-xs text-[#241C18] placeholder-[#9E9185] focus:outline-none focus:border-[#241C18] transition-colors"
-                  />
-                </div>
-
-                {/* Row 3: What would you like to create? */}
-                <div>
-                  <textarea
-                    rows={3}
-                    value={details}
-                    onChange={(e) => setDetails(e.target.value)}
-                    placeholder="What would you like to create?"
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#DDD4C8] bg-[#FAF8F5] text-xs text-[#241C18] placeholder-[#9E9185] focus:outline-none focus:border-[#241C18] transition-colors resize-none"
-                  />
-                </div>
-
-                {/* Submit Button */}
-                <button
-                  type="submit"
-                  className="w-full py-3 rounded-xl bg-[#241C18] text-[#FAF8F5] text-xs font-sans tracking-[0.06em] hover:bg-[#3D332C] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm active:scale-[0.99]"
-                >
-                  <span>Send Message</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-
-                {status === 'submitted' && (
-                  <div className="flex items-center gap-2 text-xs text-emerald-800 bg-emerald-50 border border-emerald-200 p-2.5 rounded-xl font-sans">
-                    <Check className="w-3.5 h-3.5 shrink-0" />
-                    <span>Your email app opened with the message ready to send. Thank you!</span>
+              {status === 'idle' ? (
+                <form onSubmit={handleSubmit} className="space-y-3.5">
+                  <div className="flex items-center justify-between pb-1">
+                    <span className="text-xs font-serif italic text-[#6E5B4B]">
+                      Send a message directly to Anita
+                    </span>
+                    <span className="text-[10px] uppercase font-sans tracking-wider text-[#8C7A6D]">
+                      {CREATOR_PROFILE.email}
+                    </span>
                   </div>
-                )}
-              </form>
+
+                  {/* Row 1: Name and Email */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    <div>
+                      <input
+                        type="text"
+                        required
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Your Name *"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-[#DDD4C8] bg-[#FAF8F5] text-xs text-[#241C18] placeholder-[#9E9185] focus:outline-none focus:border-[#241C18] transition-colors"
+                      />
+                    </div>
+                    <div>
+                      <input
+                        type="email"
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="Your Email *"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-[#DDD4C8] bg-[#FAF8F5] text-xs text-[#241C18] placeholder-[#9E9185] focus:outline-none focus:border-[#241C18] transition-colors"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Row 2: Brand / Company */}
+                  <div>
+                    <input
+                      type="text"
+                      value={brand}
+                      onChange={(e) => setBrand(e.target.value)}
+                      placeholder="Brand or Company Name"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-[#DDD4C8] bg-[#FAF8F5] text-xs text-[#241C18] placeholder-[#9E9185] focus:outline-none focus:border-[#241C18] transition-colors"
+                    />
+                  </div>
+
+                  {/* Row 3: What would you like to create? */}
+                  <div>
+                    <textarea
+                      rows={3}
+                      value={details}
+                      onChange={(e) => setDetails(e.target.value)}
+                      placeholder="What would you like to create? (campaign details, deliverables, timeline...)"
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-[#DDD4C8] bg-[#FAF8F5] text-xs text-[#241C18] placeholder-[#9E9185] focus:outline-none focus:border-[#241C18] transition-colors resize-none"
+                    />
+                  </div>
+
+                  {/* Submit Button */}
+                  <button
+                    type="submit"
+                    className="w-full py-3 rounded-xl bg-[#241C18] text-[#FAF8F5] text-xs font-sans tracking-[0.06em] hover:bg-[#3D332C] transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm active:scale-[0.99] group"
+                  >
+                    <span>Send Message to Anita</span>
+                    <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
+                  </button>
+
+                  <p className="text-[10px] text-center text-[#8C7A6D] font-sans pt-0.5">
+                    Prepares your message and connects to your email app or Gmail
+                  </p>
+                </form>
+              ) : (
+                /* Post-Submission Interactive Delivery Hub */
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0 mt-0.5">
+                      <Check className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h3 className="font-serif text-base text-[#241C18] font-medium leading-snug">
+                        Your message is ready to send!
+                      </h3>
+                      <p className="text-xs text-[#6B5C50] font-sans mt-0.5">
+                        Choose your preferred email client below to send your collaboration inquiry:
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Quick Action Buttons */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+                    {/* Send via Gmail Web */}
+                    <a
+                      href={gmailComposeUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#241C18] text-[#FAF8F5] text-xs font-sans hover:bg-[#3D332C] transition-all shadow-xs cursor-pointer text-center"
+                    >
+                      <Mail className="w-3.5 h-3.5 text-[#E6CDB5]" />
+                      <span>Send with Gmail</span>
+                      <ExternalLink className="w-3 h-3 opacity-70" />
+                    </a>
+
+                    {/* Send via Default Mail App */}
+                    <a
+                      href={mailtoUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-[#D5CBC0] bg-[#FCFBF9] text-[#241C18] text-xs font-sans hover:bg-[#FAF6F0] hover:border-[#241C18] transition-all shadow-xs cursor-pointer text-center"
+                    >
+                      <Mail className="w-3.5 h-3.5 text-[#7A6C60]" />
+                      <span>Default Mail App</span>
+                    </a>
+                  </div>
+
+                  {/* Copy Button */}
+                  <button
+                    type="button"
+                    onClick={handleCopyMessage}
+                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-[#D5CBC0] bg-white text-[#241C18] text-xs font-sans hover:bg-[#FAF8F5] hover:border-[#241C18] transition-all shadow-xs cursor-pointer"
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-emerald-600" />
+                        <span className="text-emerald-700 font-medium">Message Copied to Clipboard!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5 text-[#7A6C60]" />
+                        <span>Copy Message &amp; Recipient</span>
+                      </>
+                    )}
+                  </button>
+
+                  {/* Message Preview Box */}
+                  <div className="p-3 bg-[#FAF8F5] rounded-xl border border-[#E5DDD2] space-y-1.5 text-[11px] font-sans">
+                    <div className="flex items-center justify-between text-[#7A6C60]">
+                      <span className="font-medium text-[#241C18]">To:</span>
+                      <span className="font-mono text-[#5C4F44]">{CREATOR_PROFILE.email}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-[#7A6C60] pt-1 border-t border-[#EDE5DA]">
+                      <span className="font-medium text-[#241C18]">Subject:</span>
+                      <span className="truncate max-w-[210px] text-[#5C4F44]">{subjectText}</span>
+                    </div>
+                  </div>
+
+                  {/* Back to Edit Button */}
+                  <div className="pt-1 flex items-center justify-between">
+                    <button
+                      type="button"
+                      onClick={handleReset}
+                      className="inline-flex items-center gap-1.5 text-xs text-[#7A6C60] hover:text-[#241C18] transition-colors cursor-pointer"
+                    >
+                      <RotateCcw className="w-3 h-3" />
+                      <span>Edit details or send another</span>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
           </div>
